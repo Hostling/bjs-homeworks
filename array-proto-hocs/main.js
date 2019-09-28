@@ -1,13 +1,5 @@
 function compareArrays(arr1, arr2) {
-	if(!Array.isArray(arr1) || !Array.isArray(arr2)) {
-		return false;
-	}
-	if(arr1 >= arr2){
-		return arr1.every((current, index) => current === arr2[index]);
-	} else {
-		return arr2.every((current, index) => current === arr1[index]);
-	}
-	
+	return !Array.isArray(arr1) || !Array.isArray(arr2) || arr1.length != arr2.length ? false : arr1.every((current, index) => current === arr2[index]);
 }
 
 console.log(compareArrays([8, 9], [6])); // false, разные значения
@@ -21,28 +13,27 @@ function memoize(fn, limit) {
 	const results = [];
 	return function() {
 		
-		if(results.some(res => compareArrays(res.args, [arguments[0], arguments[1]]))){
-			console.log('Результат работы функции найден памяти');
-			return results.filter(elem => compareArrays(elem.args, [arguments[0], arguments[1]]))[0].result;
+		let solution = results.find(item => compareArrays(item.args, Array.from(arguments)));
+
+		if(solution) {
+			console.log('Результат работы функции найден в памяти');
+			return solution.result;
 		} else {
+			console.log('Функция вызвана не из памяти');
 			if(results.length === limit) {
 				results.shift();
 			}
-
-			let ex = fn(arguments[0], arguments[1]);
+			let ex = fn(...arguments);
 			results.push({
-					args: [arguments[0], arguments[1]],
-					result: ex,
+				args: Array.from(arguments),
+				result: ex,
 			});
 
 			return ex;
 		}
 	} 
 }
-const sum = (a, b) => {
-	console.log('Функция вызвана не из памяти');
-	return a + b;
-};
+const sum = (a, b) => a + b;
 
 const mSum = memoize(sum, 2); 
 
